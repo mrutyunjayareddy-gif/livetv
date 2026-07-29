@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TV Channels</title>
+
+<style>
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#000;
+}
+
+#menu{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:190px;
+    background:#efefef;
+    overflow-y:auto;
+    border-right:1px solid #bbb;
+}
+
+#menu div{
+    padding:14px;
+    cursor:pointer;
+    border-bottom:1px solid #ddd;
+    color:#000;
+    font-size:18px;
+}
+
+#menu div.active{
+    background:#1b73e8;
+    color:#fff;
+    font-weight:bold;
+}
+
+#player{
+    position:fixed;
+    left:190px;
+    top:0;
+    width:calc(100% - 190px);
+    height:100%;
+    background:#000;
+}
+
+video{
+    width:100%;
+    height:100%;
+    background:#000;
+}
+</style>
+</head>
+
+<body>
+
+<div id="menu"></div>
+
+<div id="player">
+    <video id="video"
+           controls
+           autoplay
+           muted
+           playsinline>
+    </video>
+</div>
+
+<script>
+
+const channels = [
+
+["ETV Cinema","https://d27zlkxhgwrfgo.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_CINEMA_H264_cloud_in/index.m3u8"],
+
+["ETV Andhra","https://d1g35elx8qnif3.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_AP_H264_cloud_in/index.m3u8"],
+
+["ETV Telangana","https://d37d7pfp7vjqhh.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_TS_H264_cloud_in/index.m3u8"],
+
+["ETV Comedy","https://cc-wie8j8y69d2uy.akamaized.net/WWBI/Amagi/ETV_Comedy_IN/playlist.m3u8"],
+
+["ETV Josh","https://cc-uyh1ow5zouoio.akamaized.net/WWBI/Amagi/ETV_Josh_IN/playlist.m3u8"],
+
+["ETV Telugu","https://d27zlkxhgwrfgo.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_HD_H264_cloud_in/index.m3u8"],
+
+["TV9","https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9telcmjhcs/liveabr/playlist.m3u8"],
+
+["NTV","https://mumbai-edge.smartplaytv.in/NTVTelugu/index.m3u8"],
+
+["Sakshi","https://cdn-1.pishow.tv/live/409/master.m3u8"],
+
+["Zee News","https://d116gfrn8orazi.cloudfront.net/index.m3u8?akes=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3NjcxOTc5NzJ9.O4qmdMPbHwKrCg6hFXvD70vjSPWKQd0a7NrjmFdeMB8"],
+
+["Telugu One","https://teluguone-yupptv.vgcdn.net/v1/019be9e3f04d1ea55784338b5c3e89/019be9e4474415fc60e93459e1e808/teluguone_2500k.m3u8"],
+
+["BBC","https://vs-cmaf-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/hevc_iptv_mse_v0.mpd"]
+
+];
+
+const video=document.getElementById("video");
+const menu=document.getElementById("menu");
+
+let current=0;
+
+function play(index){
+
+    current=index;
+
+    video.pause();
+
+    video.src=channels[index][1];
+
+    video.load();
+
+    video.play().catch(function(){});
+
+    const items=menu.children;
+
+    for(let i=0;i<items.length;i++)
+        items[i].className="";
+
+    items[index].className="active";
+}
+
+for(let i=0;i<channels.length;i++){
+
+    let item=document.createElement("div");
+
+    item.innerHTML=channels[i][0];
+
+    item.onclick=function(){
+        play(i);
+    };
+
+    menu.appendChild(item);
+}
+
+// Auto play first channel
+window.onload=function(){
+
+    setTimeout(function(){
+        play(0);
+    },500);
+
+};
+
+</script>
+
+</body>
+</html>
