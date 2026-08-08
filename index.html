@@ -94,55 +94,45 @@
     const menu = document.getElementById("menu");
     let hls = null;
     let dashPlayer = null;
+    let currentChannelIndex = -1; // Track current channel
 
-    // Initialize DASH polyfills
     shaka.polyfill.installAll();
 
     async function play(index) {
+        // Boundary check
+		if(currentChannelIndex === index) return;
+        if (index < 0) index = channels.length - 1;
+        if (index >= channels.length) index = 0;
+        
+        currentChannelIndex = index;
         const url = channels[index][1];
         const isDash = url.endsWith('.mpd');
 
-        // Cleanup existing instances
-        if (hls) {
-            hls.destroy();
-            hls = null;
-        }
-        if (dashPlayer) {
-            await dashPlayer.destroy();
-            dashPlayer = null;
-        }
+        if (hls) { hls.destroy(); hls = null; }
+        if (dashPlayer) { await dashPlayer.destroy(); dashPlayer = null; }
         video.src = "";
 
-        // 1. Logic for DASH (.mpd) - e.g., BBC
         if (isDash) {
             dashPlayer = new shaka.Player(video);
             try {
                 await dashPlayer.load(url);
                 video.play().catch(() => {});
-            } catch (e) {
-                console.error("DASH error", e);
-            }
+            } catch (e) { console.error("DASH error", e); }
         } 
-        // 2. Logic for HLS (.m3u8) - e.g., ETV
         else if (Hls.isSupported()) {
             hls = new Hls();
             hls.loadSource(url);
             hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                video.play().catch(() => {});
-            });
+            hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); });
         } 
-        // 3. Native fallback (Safari/iOS)
         else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = url;
-            video.addEventListener('loadedmetadata', () => {
-                video.play().catch(() => {});
-            });
+            video.addEventListener('loadedmetadata', () => { video.play().catch(() => {}); });
         }
 
-        // Update UI active state
         Array.from(menu.children).forEach((item, i) => {
             item.className = (i === index) ? "active" : "";
+            if (i === index) item.scrollIntoView({ block: "nearest" });
         });
     }
 
@@ -154,7 +144,20 @@
         menu.appendChild(item);
     });
 
-    // Auto play first channel
+    // Keyboard and Remote Control Logic
+    document.addEventListener('keydown', function(e) {
+        const keyCode = e.keyCode;
+        
+        // Laptop Up (38) or TV Channel Up (33)
+        if (keyCode === 38 || keyCode === 33) {
+            play(currentChannelIndex - 1);
+        }
+        // Laptop Down (40) or TV Channel Down (34)
+        else if (keyCode === 40 || keyCode === 34) {
+            play(currentChannelIndex + 1);
+        }
+    });
+
     window.onload = () => {
         setTimeout(() => play(0), 500);
     };
